@@ -1,3 +1,5 @@
+import 'package:alu_acabuddy/providers/assignment_provider.dart';
+import 'package:alu_acabuddy/providers/attendance_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/user_provider.dart';
@@ -10,7 +12,7 @@ class HomeDashboard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final attendanceProvider = Provider.of<AttendanceProvider>(context);
-    final attendanceProvider = Provider.of<AssignmentProvider>(context);
+    final assignmentProvider = Provider.of<AssignmentProvider>(context);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -19,12 +21,12 @@ class HomeDashboard extends StatelessWidget {
           children: [
             // --- SECTION 1: HEADER (Blue Box from Figma) ---
             Container(
-              padding: const EdgeInsets.only(top: 60, left 20, right: 20, bottom: 30),
+              padding: const EdgeInsets.only(top: 60, left:20, right: 20, bottom: 30),
               decoration: const BoxDecoration(
                 color: AppColors.primary, // Dark Blue 
                 borderRadius: BorderRadius.only(bottomLeft: Radius.circular(30), bottomRight: Radius.circular(30)),
              ),
-              child: Coloum(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text("Week 4", style: TextStyle(color: Colors.white70)),
@@ -129,6 +131,4 @@ class HomeDashboard extends StatelessWidget {
     );
   }
 }
-                
-            
-}
+              
