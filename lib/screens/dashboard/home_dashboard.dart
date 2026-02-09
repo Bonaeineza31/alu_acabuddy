@@ -1,9 +1,10 @@
 import 'package:alu_acabuddy/providers/assignment_provider.dart';
 import 'package:alu_acabuddy/providers/attendance_provider.dart';
+import 'package:alu_acabuddy/screens/attendance/attendance_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/user_provider.dart';
-import '../utils/app_colors.dart';
+import '../../providers/user_provider.dart';
+import '../../utils/app_colors.dart';
 
 /// Home Dashboard - Main screen after login
 class HomeDashboard extends StatelessWidget {
@@ -16,23 +17,28 @@ class HomeDashboard extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: SingleChildScrollView( // Prevents Pixel overflow errors
+      body: SingleChildScrollView(
         child: Column(
           children: [
             // --- SECTION 1: HEADER (Blue Box from Figma) ---
             Container(
-              padding: const EdgeInsets.only(top: 60, left:20, right: 20, bottom: 30),
+              padding: const EdgeInsets.only(top: 60, left: 20, right: 20, bottom: 30),
               decoration: const BoxDecoration(
-                color: AppColors.primary, // Dark Blue 
-                borderRadius: BorderRadius.only(bottomLeft: Radius.circular(30), bottomRight: Radius.circular(30)),
-             ),
+                color: AppColors.primary,
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(30),
+                  bottomRight: Radius.circular(30),
+                ),
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text("Week 4", style: TextStyle(color: Colors.white70)),
                   const SizedBox(height: 8),
-                  const Text("Welcome back, Bonae! 👋", 
-                    style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
+                  const Text(
+                    "Welcome back, Bonae! 👋",
+                    style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+                  ),
                   const Text("Monday, January 26, 2026", style: TextStyle(color: Colors.white70)),
                 ],
               ),
@@ -45,21 +51,28 @@ class HomeDashboard extends StatelessWidget {
                   // --- SECTION 2: SUMMARY CARDS (Logic-driven) ---
                   Row(
                     children: [
-                      // Attendance Card
+                      // Attendance Card - CLICKABLE
                       Expanded(
-                        child: _buildStatCard(
-                          title: "${attendanceProvider.attendancePercentage.toStringAsFixed(0)}%",
-                          subtitle: "Attendance Rate",
-                          // LOGIC: Turns Red if below 75%, otherwise Green
-                          color: attendanceProvider.isBelowMinimum ? AppColors.danger : AppColors.success,
-                          icon: Icons.calendar_today,
+                        child: InkWell(
+                          onTap: () {
+                            print("Attendance card tapped!"); // Debug print
+                            Navigator.pushNamed(context, '/attendance_screen');
+                          },
+                          borderRadius: BorderRadius.circular(20),
+                          child: _buildStatCard(
+                            title: "${attendanceProvider.attendancePercentage.toStringAsFixed(0)}%",
+                            subtitle: "Attendance Rate",
+                            color: attendanceProvider.isBelowMinimum ? AppColors.danger : AppColors.success,
+                            icon: Icons.calendar_today,
+                            showArrow: true,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 15),
                       // Pending Tasks Card
                       Expanded(
                         child: _buildStatCard(
-                          title: "${assignmentProvider.pendingCount}", // Pulls from your Task provider
+                          title: "${assignmentProvider.pendingCount}",
                           subtitle: "Pending Tasks",
                           color: AppColors.primary,
                           icon: Icons.local_fire_department,
@@ -82,8 +95,12 @@ class HomeDashboard extends StatelessWidget {
                         children: const [
                           Icon(Icons.warning, color: AppColors.danger),
                           SizedBox(width: 10),
-                          Text("AT RISK: Keep attendance above 75%!", 
-                            style: TextStyle(color: AppColors.danger, fontWeight: FontWeight.bold)),
+                          Expanded(
+                            child: Text(
+                              "AT RISK: Keep attendance above 75%!",
+                              style: TextStyle(color: AppColors.danger, fontWeight: FontWeight.bold),
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -101,8 +118,14 @@ class HomeDashboard extends StatelessWidget {
     );
   }
 
-  // Reusable card widget to match your Figma's rounded corners
-  Widget _buildStatCard({required String title, required String subtitle, required Color color, required IconData icon}) {
+  // Reusable card widget with optional arrow
+  Widget _buildStatCard({
+    required String title,
+    required String subtitle,
+    required Color color,
+    required IconData icon,
+    bool showArrow = false,
+  }) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -112,10 +135,28 @@ class HomeDashboard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: Colors.white),
+          // Top row with icon and arrow
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Icon(icon, color: Colors.white, size: 24),
+              if (showArrow)
+                Icon(
+                  Icons.arrow_forward,
+                  color: Colors.white,
+                  size: 22,
+                ),
+            ],
+          ),
           const SizedBox(height: 10),
-          Text(title, style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold)),
-          Text(subtitle, style: const TextStyle(color: Colors.white70, fontSize: 12)),
+          Text(
+            title,
+            style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold),
+          ),
+          Text(
+            subtitle,
+            style: const TextStyle(color: Colors.white70, fontSize: 12),
+          ),
         ],
       ),
     );
@@ -125,10 +166,12 @@ class HomeDashboard extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+        Text(
+          title,
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+        ),
         const Icon(Icons.more_horiz),
       ],
     );
   }
 }
-              

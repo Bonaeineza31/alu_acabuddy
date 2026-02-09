@@ -4,7 +4,7 @@ import 'package:uuid/uuid.dart';
 import '../../models/user.dart';
 import '../../providers/user_provider.dart';
 import '../../utils/app_colors.dart';
-import '../home_dashboard.dart';
+import '../dashboard/home_dashboard.dart';
 import 'signup_screen.dart';
 
 /// Login screen for existing users
