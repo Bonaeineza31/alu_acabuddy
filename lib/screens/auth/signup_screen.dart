@@ -1,3 +1,4 @@
+import 'package:alu_acabuddy/navigation/main_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
@@ -51,7 +52,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       context.read<UserProvider>().login(user);
 
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const HomeDashboard()),
+        MaterialPageRoute(builder: (context) => const MainNavigation()),
       );
     }
   }
