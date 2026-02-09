@@ -32,10 +32,10 @@ class CustomButton extends StatelessWidget {
           backgroundColor: backgroundColor ?? AppColors.primary,
           foregroundColor: textColor ?? AppColors.textWhite,
           shape: RoundedRectangleBorder(
-            borderRadius:
-                BorderRadius.circular(AppConstants.defaultBorderRadius),
+            borderRadius: BorderRadius.circular(AppConstants.defaultBorderRadius),
           ),
           elevation: 0,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
         ),
         child: isLoading
             ? const SizedBox(
@@ -48,16 +48,21 @@ class CustomButton extends StatelessWidget {
               )
             : Row(
                 mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min, // ← Important: don't expand unnecessarily
                 children: [
                   if (icon != null) ...[
-                    Icon(icon, size: 20),
+                    Icon(icon, size: 18),
                     const SizedBox(width: 8),
                   ],
-                  Text(
-                    text,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
+                  Flexible( // ← Wrap Text in Flexible to prevent overflow
+                    child: Text(
+                      text,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      overflow: TextOverflow.ellipsis, // ← Add ellipsis if too long
+                      maxLines: 1,
                     ),
                   ),
                 ],

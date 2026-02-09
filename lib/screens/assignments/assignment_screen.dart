@@ -1,11 +1,10 @@
+import 'package:alu_acabuddy/screens/assignments/add_assignment_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/assignment_provider.dart';
 import '../../utils/app_colors.dart';
-import '../../utils/constants.dart';
-import '../../utils/helpers.dart';
 import '../../widgets/assignments/assignment_list_item.dart';
-import 'add_assignment_dialog.dart';
+
 
 class AssignmentsScreen extends StatelessWidget {
   const AssignmentsScreen({super.key});
@@ -22,60 +21,76 @@ class AssignmentsScreen extends StatelessWidget {
           children: [
             // Header
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.only(
+                left: 20,
+                right: 20,
+                top: 20,
+                bottom: 24, // ← Increased from 20 to 24
+              ),
               decoration: const BoxDecoration(
                 color: AppColors.primary,
                 borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(20),
-                  bottomRight: Radius.circular(20),
+                  bottomLeft: Radius.circular(24),
+                  bottomRight: Radius.circular(24),
                 ),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.list_alt,
-                        color: AppColors.textWhite,
-                        size: 24,
-                      ),
-                      const SizedBox(width: 12),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'My Tasks',
-                            style: TextStyle(
-                              color: AppColors.textWhite,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
+                  // Left side - Icon and Text
+                  Expanded(
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.list_alt,
+                          color: AppColors.textWhite,
+                          size: 28,
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'My Tasks',
+                                style: TextStyle(
+                                  color: AppColors.textWhite,
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                '${assignmentProvider.completedCount} of ${assignments.length} completed',
+                                style: const TextStyle(
+                                  color: AppColors.textWhite,
+                                  fontSize: 13,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
                           ),
-                          Text(
-                            '${assignmentProvider.completedCount} of ${assignments.length} completed',
-                            style: const TextStyle(
-                              color: AppColors.textWhite,
-                              fontSize: 13,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
+                        ),
+                      ],
+                    ),
                   ),
+                  
+                  const SizedBox(width: 8),
+                  
+                  // Right side - Add button
                   Container(
                     decoration: const BoxDecoration(
                       color: AppColors.secondary,
                       shape: BoxShape.circle,
                     ),
                     child: IconButton(
-                      icon: const Icon(Icons.add, color: AppColors.textWhite),
+                      icon: const Icon(Icons.add, color: AppColors.textWhite, size: 26),
+                      padding: const EdgeInsets.all(12),
                       onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const AddAssignmentDialog(),
-                          ),
+                        showDialog(
+                          context: context,
+                          barrierColor: Colors.black54,
+                          builder: (context) => const AddAssignmentDialog(),
                         );
                       },
                     ),
@@ -83,6 +98,8 @@ class AssignmentsScreen extends StatelessWidget {
                 ],
               ),
             ),
+
+            const SizedBox(height: 8), // ← Small gap between header and content
 
             // Task List
             Expanded(
