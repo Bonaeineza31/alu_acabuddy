@@ -55,8 +55,12 @@ class HomeDashboard extends StatelessWidget {
                       Expanded(
                         child: InkWell(
                           onTap: () {
-                            print("Attendance card tapped!"); // Debug print
-                            Navigator.pushNamed(context, '/attendance_screen');
+                            Navigator.push(
+                              context,
+                     MaterialPageRoute(
+                                builder: (context) => const AttendanceScreen(),
+                              ),
+                            );
                           },
                           borderRadius: BorderRadius.circular(20),
                           child: _buildStatCard(

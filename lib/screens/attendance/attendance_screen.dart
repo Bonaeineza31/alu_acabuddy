@@ -25,10 +25,15 @@ class AttendanceScreen extends StatelessWidget {
                 child: Column(
                   children: [
                     Row(
-                      children: const [
-                        Icon(Icons.arrow_back, color: Colors.white),
-                        SizedBox(width: 10),
-                        Text(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.arrow_back, color: Colors.white),
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                        ),
+                        const SizedBox(width: 10),
+                        const Text(
                           "Back to Dashboard",
                           style: TextStyle(color: Colors.white),
                         )
@@ -169,7 +174,7 @@ class AttendanceScreen extends StatelessWidget {
   }
 }
 
-////////////////////////////////////////////////////////
+
 
 class StatusCard extends StatelessWidget {
   final String title;
