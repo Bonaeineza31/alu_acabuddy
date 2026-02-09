@@ -4,7 +4,7 @@ import 'providers/user_provider.dart';
 import 'providers/assignment_provider.dart';
 import 'providers/attendance_provider.dart';
 import 'providers/session_provider.dart';
-import 'screens/auth_screen.dart';
+import 'screens/auth/auth_screen.dart';
 import 'utils/app_colors.dart';
 
 void main() {
