@@ -1,3 +1,4 @@
+import 'package:alu_acabuddy/utils/constants.dart';
 import 'package:flutter/material.dart';
 
 enum AttendanceStatus { present, late, absent }
@@ -26,7 +27,7 @@ class AttendanceRecord {
     }
   }
   
-  Color get statusColor {
+  Color? get statusColor {
     switch (status) {
       case AttendanceStatus.present:
         return AppConstants.successColor;
