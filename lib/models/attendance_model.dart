@@ -1,5 +1,5 @@
-import 'package:alu_acabuddy/utils/constants.dart';
 import 'package:flutter/material.dart';
+import 'package:alu_acabuddy/utils/app_colors.dart'; // ← Changed import
 
 enum AttendanceStatus { present, late, absent }
 
@@ -27,14 +27,14 @@ class AttendanceRecord {
     }
   }
   
-  Color? get statusColor {
+  Color get statusColor {  // ← Removed nullable (?)
     switch (status) {
       case AttendanceStatus.present:
-        return AppConstants.successColor;
+        return AppColors.success;  // ← Changed from AppConstants.successColor
       case AttendanceStatus.late:
-        return Colors.orange;
+        return AppColors.warning;  // ← Changed to use AppColors
       case AttendanceStatus.absent:
-        return AppConstants.dangerColor;
+        return AppColors.danger;   // ← Changed from AppConstants.dangerColor
     }
   }
   

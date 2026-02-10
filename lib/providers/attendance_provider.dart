@@ -2,33 +2,13 @@ import 'package:flutter/material.dart';
 import '../models/session.dart';
 import '../utils/helpers.dart';
 import '../utils/constants.dart';
-import '../utils/app_colors.dart';
 
-/// Provider for managing attendance tracking and calculations
 class AttendanceProvider extends ChangeNotifier {
-  final List<Session> _sessions = [
-    Session(
-    id: 'h1',
-    title: 'Entrepreneurial Leadership',
-    date: DateTime.now().subtract(const Duration(days: 1)),
-    startTime: '09:00',
-    endTime: '10:30',
-    attendanceStatus: 'Present', // This makes it 100%
-  ),
-  Session(
-    id: 'h2',
-    title: 'Computer Science',
-    date: DateTime.now().subtract(const Duration(days: 2)),
-    startTime: '11:00',
-    endTime: '12:30',
-    attendanceStatus: 'Present',
-  ),
-  ];
+  List<Session> _sessions = [];
 
   /// Update sessions list (called from SessionProvider)
   void updateSessions(List<Session> sessions) {
-    _sessions.clear();
-    _sessions.addAll(sessions);
+    _sessions = sessions;
     notifyListeners();
   }
 
@@ -98,7 +78,7 @@ class AttendanceProvider extends ChangeNotifier {
     }).length;
   }
 
-  /// Get attendance history (recent sessions with attendance marked)
+  /// Get attendance history
   List<Session> get attendanceHistory {
     return _sessions
         .where((s) => s.attendanceStatus.isNotEmpty)
