@@ -1,3 +1,4 @@
+import 'package:alu_acabuddy/models/session.dart';
 import 'package:flutter/material.dart';
 import '../models/assignment.dart';
 import '../utils/helpers.dart';
@@ -14,8 +15,7 @@ class AssignmentProvider extends ChangeNotifier {
   /// Get upcoming assignments (due within next 7 days)
   List<Assignment> get upcomingAssignments {
     return _assignments.where((assignment) {
-      return !assignment.isCompleted && 
-             Helpers.isUpcoming(assignment.dueDate);
+      return !assignment.isCompleted && Helpers.isUpcoming(assignment.dueDate);
     }).toList()
       ..sort((a, b) => a.dueDate.compareTo(b.dueDate));
   }
@@ -23,8 +23,7 @@ class AssignmentProvider extends ChangeNotifier {
   /// Get assignments due today
   List<Assignment> get todayAssignments {
     return _assignments.where((assignment) {
-      return !assignment.isCompleted && 
-             Helpers.isToday(assignment.dueDate);
+      return !assignment.isCompleted && Helpers.isToday(assignment.dueDate);
     }).toList();
   }
 
@@ -95,4 +94,6 @@ class AssignmentProvider extends ChangeNotifier {
         .where((a) => a.priority == priority && !a.isCompleted)
         .toList();
   }
+
+  void addSession(Session newSession) {}
 }

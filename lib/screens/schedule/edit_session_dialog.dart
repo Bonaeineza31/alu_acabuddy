@@ -2,24 +2,39 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../models/assignment.dart';
 import '../../providers/assignment_provider.dart';
+import '../../providers/session_provider.dart';
 import '../../utils/app_colors.dart';
-import '../../utils/constants.dart';
 import '../../widgets/common/text_field.dart';
 import '../../widgets/common/button.dart';
 
-class AddAssignmentDialog extends StatefulWidget {
-  const AddAssignmentDialog({super.key});
+class EditAssignmentDialog extends StatefulWidget {
+  final Assignment assignment;
+
+  const EditAssignmentDialog({
+    super.key,
+    required this.assignment,
+  });
 
   @override
-  State<AddAssignmentDialog> createState() => _AddAssignmentDialogState();
+  State<EditAssignmentDialog> createState() => _EditAssignmentDialogState();
 }
 
-class _AddAssignmentDialogState extends State<AddAssignmentDialog> {
+class _EditAssignmentDialogState extends State<EditAssignmentDialog> {
   final _formKey = GlobalKey<FormState>();
-  final _titleController = TextEditingController();
-  final _courseController = TextEditingController();
-  DateTime? _selectedDate;
-  String _selectedPriority = 'Medium';
+  late TextEditingController _titleController;
+  late TextEditingController _courseController;
+  late DateTime _selectedDate;
+  late String _selectedPriority;
+
+  @override
+  void initState() {
+    super.initState();
+    _titleController = TextEditingController(text: widget.assignment.title);
+    _courseController =
+        TextEditingController(text: widget.assignment.courseName);
+    _selectedDate = widget.assignment.dueDate;
+    _selectedPriority = widget.assignment.priority;
+  }
 
   @override
   void dispose() {
@@ -31,7 +46,7 @@ class _AddAssignmentDialogState extends State<AddAssignmentDialog> {
   Future<void> _selectDate() async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
+      initialDate: _selectedDate,
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 365)),
       builder: (context, child) {
@@ -56,32 +71,26 @@ class _AddAssignmentDialogState extends State<AddAssignmentDialog> {
     }
   }
 
-  void _saveAssignment() {
-    if (_formKey.currentState!.validate() && _selectedDate != null) {
+  void _saveChanges() {
+    if (_formKey.currentState!.validate()) {
       final assignmentProvider =
           Provider.of<AssignmentProvider>(context, listen: false);
 
-      final newAssignment = Assignment(
+      final updatedAssignment = widget.assignment.copyWith(
         title: _titleController.text.trim(),
         courseName: _courseController.text.trim(),
-        dueDate: _selectedDate!,
+        dueDate: _selectedDate,
         priority: _selectedPriority,
       );
 
-      assignmentProvider.addAssignment(newAssignment);
+      assignmentProvider.updateAssignment(
+          widget.assignment.id, updatedAssignment);
       Navigator.pop(context);
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Assignment added successfully!'),
+          content: Text('Assignment updated successfully!'),
           backgroundColor: AppColors.success,
-        ),
-      );
-    } else if (_selectedDate == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select a due date'),
-          backgroundColor: AppColors.danger,
         ),
       );
     }
@@ -115,7 +124,7 @@ class _AddAssignmentDialogState extends State<AddAssignmentDialog> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text(
-                    'Add New Assignment',
+                    'Edit Assignment',
                     style: TextStyle(
                       color: AppColors.textWhite,
                       fontSize: 18,
@@ -141,14 +150,14 @@ class _AddAssignmentDialogState extends State<AddAssignmentDialog> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Assignment Title
+                      // Session Title
                       CustomTextField(
-                        label: 'Assignment Title *',
-                        hint: 'Enter assignment title',
+                        label: 'Session Title *',
+                        hint: 'Enter session title',
                         controller: _titleController,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Please enter assignment title';
+                            return 'Enter session title';
                           }
                           return null;
                         },
@@ -158,12 +167,12 @@ class _AddAssignmentDialogState extends State<AddAssignmentDialog> {
 
                       // Course
                       CustomTextField(
-                        label: 'Course *',
-                        hint: 'Enter course name',
+                        label: 'Session Type *',
+                        hint: 'Class or Event',
                         controller: _courseController,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Please enter course name';
+                            return 'Please enter session type';
                           }
                           return null;
                         },
@@ -171,9 +180,9 @@ class _AddAssignmentDialogState extends State<AddAssignmentDialog> {
 
                       const SizedBox(height: 16),
 
-                      // Due Date
+                      // Date
                       const Text(
-                        'Due Date *',
+                        'Date *',
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
@@ -194,13 +203,9 @@ class _AddAssignmentDialogState extends State<AddAssignmentDialog> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                _selectedDate == null
-                                    ? 'Select due date'
-                                    : '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}',
-                                style: TextStyle(
-                                  color: _selectedDate == null
-                                      ? AppColors.textSecondary
-                                      : AppColors.textPrimary,
+                                '${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
+                                style: const TextStyle(
+                                  color: AppColors.textPrimary,
                                   fontSize: 16,
                                 ),
                               ),
@@ -216,45 +221,42 @@ class _AddAssignmentDialogState extends State<AddAssignmentDialog> {
 
                       const SizedBox(height: 16),
 
-                      // Priority
-                      const Text(
-                        'Priority *',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _buildPriorityButton(
-                                'High', AppColors.highPriority),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _buildPriorityButton(
-                                'Medium', AppColors.mediumPriority),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _buildPriorityButton(
-                                'Low', AppColors.lowPriority),
-                          ),
-                        ],
-                      ),
+                      // // Priority
+                      // const Text(
+                      //   'Priority *',
+                      //   style: TextStyle(
+                      //     fontSize: 14,
+                      //     fontWeight: FontWeight.w500,
+                      //     color: AppColors.textPrimary,
+                      //   ),
+                      // ),
+                      // const SizedBox(height: 12),
+                      // Row(
+                      //   children: [
+                      //     Expanded(
+                      //       child: _buildPriorityButton('High', AppColors.highPriority),
+                      //     ),
+                      //     const SizedBox(width: 12),
+                      //     Expanded(
+                      //       child: _buildPriorityButton('Medium', AppColors.mediumPriority),
+                      //     ),
+                      //     const SizedBox(width: 12),
+                      //     Expanded(
+                      //       child: _buildPriorityButton('Low', AppColors.lowPriority),
+                      //     ),
+                      //   ],
+                      // ),
 
-                      const SizedBox(height: 24),
+                      // const SizedBox(height: 24),
 
                       // Buttons
                       Row(
                         children: [
                           Expanded(
                             child: CustomButton(
-                              text: 'Add Assignment',
-                              onPressed: _saveAssignment,
-                              icon: Icons.check,
+                              text: 'Save Changes',
+                              onPressed: _saveChanges,
+                              icon: Icons.save,
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -279,32 +281,32 @@ class _AddAssignmentDialogState extends State<AddAssignmentDialog> {
     );
   }
 
-  Widget _buildPriorityButton(String priority, Color color) {
-    final isSelected = _selectedPriority == priority;
+//   Widget _buildPriorityButton(String priority, Color color) {
+//     final isSelected = _selectedPriority == priority;
 
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedPriority = priority;
-        });
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(
-          color: isSelected ? color : color,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Center(
-          child: Text(
-            priority,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: isSelected ? AppColors.textWhite : color,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+//     return GestureDetector(
+//       onTap: () {
+//         setState(() {
+//           _selectedPriority = priority;
+//         });
+//       },
+//       child: Container(
+//         padding: const EdgeInsets.symmetric(vertical: 12),
+//         decoration: BoxDecoration(
+//           color: isSelected ? color : color.withOpacity(0.1),
+//           borderRadius: BorderRadius.circular(8),
+//         ),
+//         child: Center(
+//           child: Text(
+//             priority,
+//             style: TextStyle(
+//               fontSize: 14,
+//               fontWeight: FontWeight.w600,
+//               color: isSelected ? AppColors.textWhite : color,
+//             ),
+//           ),
+//         ),
+//       ),
+//     );
+//   }
 }

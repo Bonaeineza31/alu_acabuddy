@@ -22,7 +22,8 @@ class HomeDashboard extends StatelessWidget {
           children: [
             // --- SECTION 1: HEADER (Blue Box from Figma) ---
             Container(
-              padding: const EdgeInsets.only(top: 60, left: 20, right: 20, bottom: 30),
+              padding: const EdgeInsets.only(
+                  top: 60, left: 20, right: 20, bottom: 30),
               decoration: const BoxDecoration(
                 color: AppColors.primary,
                 borderRadius: BorderRadius.only(
@@ -37,9 +38,13 @@ class HomeDashboard extends StatelessWidget {
                   const SizedBox(height: 8),
                   const Text(
                     "Welcome back, Bonae! 👋",
-                    style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold),
                   ),
-                  const Text("Monday, January 26, 2026", style: TextStyle(color: Colors.white70)),
+                  const Text("Monday, January 26, 2026",
+                      style: TextStyle(color: Colors.white70)),
                 ],
               ),
             ),
@@ -60,9 +65,12 @@ class HomeDashboard extends StatelessWidget {
                           },
                           borderRadius: BorderRadius.circular(20),
                           child: _buildStatCard(
-                            title: "${attendanceProvider.attendancePercentage.toStringAsFixed(0)}%",
+                            title:
+                                "${attendanceProvider.attendancePercentage.toStringAsFixed(0)}%",
                             subtitle: "Attendance Rate",
-                            color: attendanceProvider.isBelowMinimum ? AppColors.danger : AppColors.success,
+                            color: attendanceProvider.isBelowMinimum
+                                ? AppColors.danger
+                                : AppColors.success,
                             icon: Icons.calendar_today,
                             showArrow: true,
                           ),
@@ -87,7 +95,7 @@ class HomeDashboard extends StatelessWidget {
                       margin: const EdgeInsets.only(top: 20),
                       padding: const EdgeInsets.all(15),
                       decoration: BoxDecoration(
-                        color: AppColors.danger.withOpacity(0.1),
+                        color: AppColors.danger,
                         border: Border.all(color: AppColors.danger),
                         borderRadius: BorderRadius.circular(10),
                       ),
@@ -98,7 +106,9 @@ class HomeDashboard extends StatelessWidget {
                           Expanded(
                             child: Text(
                               "AT RISK: Keep attendance above 75%!",
-                              style: TextStyle(color: AppColors.danger, fontWeight: FontWeight.bold),
+                              style: TextStyle(
+                                  color: AppColors.danger,
+                                  fontWeight: FontWeight.bold),
                             ),
                           ),
                         ],
@@ -151,7 +161,8 @@ class HomeDashboard extends StatelessWidget {
           const SizedBox(height: 10),
           Text(
             title,
-            style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold),
+            style: const TextStyle(
+                color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold),
           ),
           Text(
             subtitle,
@@ -168,7 +179,10 @@ class HomeDashboard extends StatelessWidget {
       children: [
         Text(
           title,
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+          style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary),
         ),
         const Icon(Icons.more_horiz),
       ],

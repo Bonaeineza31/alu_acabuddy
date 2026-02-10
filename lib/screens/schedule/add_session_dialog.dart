@@ -1,25 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../models/assignment.dart';
-import '../../providers/assignment_provider.dart';
+import 'edit_session_dialog.dart';
+import '../../models/session.dart';
+import '../../providers/session_provider.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/constants.dart';
 import '../../widgets/common/text_field.dart';
 import '../../widgets/common/button.dart';
 
-class AddAssignmentDialog extends StatefulWidget {
-  const AddAssignmentDialog({super.key});
+class AddSessionDialog extends StatefulWidget {
+  const AddSessionDialog({super.key});
 
   @override
-  State<AddAssignmentDialog> createState() => _AddAssignmentDialogState();
+  State<AddSessionDialog> createState() => _AddSessionDialogState();
 }
 
-class _AddAssignmentDialogState extends State<AddAssignmentDialog> {
+class _AddSessionDialogState extends State<AddSessionDialog> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _courseController = TextEditingController();
   DateTime? _selectedDate;
-  String _selectedPriority = 'Medium';
+  // String _selectedPriority = 'Medium';
 
   @override
   void dispose() {
@@ -56,31 +58,32 @@ class _AddAssignmentDialogState extends State<AddAssignmentDialog> {
     }
   }
 
-  void _saveAssignment() {
+  void _saveSession() {
     if (_formKey.currentState!.validate() && _selectedDate != null) {
       final assignmentProvider =
-          Provider.of<AssignmentProvider>(context, listen: false);
+          Provider.of<SessionProvider>(context, listen: false);
 
-      final newAssignment = Assignment(
+      final newSession = Session(
         title: _titleController.text.trim(),
-        courseName: _courseController.text.trim(),
-        dueDate: _selectedDate!,
-        priority: _selectedPriority,
+        date: _selectedDate!,
+        startTime: '',
+        endTime: '',
+        sessionType: '',
       );
 
-      assignmentProvider.addAssignment(newAssignment);
+      assignmentProvider.addSession(newSession);
       Navigator.pop(context);
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Assignment added successfully!'),
+          content: Text('Session added successfully!'),
           backgroundColor: AppColors.success,
         ),
       );
     } else if (_selectedDate == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please select a due date'),
+          content: Text('Please select a date'),
           backgroundColor: AppColors.danger,
         ),
       );
@@ -115,7 +118,7 @@ class _AddAssignmentDialogState extends State<AddAssignmentDialog> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text(
-                    'Add New Assignment',
+                    'Add New Session',
                     style: TextStyle(
                       color: AppColors.textWhite,
                       fontSize: 18,
@@ -141,14 +144,14 @@ class _AddAssignmentDialogState extends State<AddAssignmentDialog> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Assignment Title
+                      // Session Title
                       CustomTextField(
-                        label: 'Assignment Title *',
-                        hint: 'Enter assignment title',
+                        label: 'Session Title *',
+                        hint: 'Enter session title',
                         controller: _titleController,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Please enter assignment title';
+                            return 'Please enter session title';
                           }
                           return null;
                         },
@@ -156,14 +159,14 @@ class _AddAssignmentDialogState extends State<AddAssignmentDialog> {
 
                       const SizedBox(height: 16),
 
-                      // Course
+                      // Session
                       CustomTextField(
-                        label: 'Course *',
-                        hint: 'Enter course name',
+                        label: 'Session Type *',
+                        hint: 'Class or Event',
                         controller: _courseController,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Please enter course name';
+                            return 'Please enter session type';
                           }
                           return null;
                         },
@@ -171,9 +174,9 @@ class _AddAssignmentDialogState extends State<AddAssignmentDialog> {
 
                       const SizedBox(height: 16),
 
-                      // Due Date
+                      // Date
                       const Text(
-                        'Due Date *',
+                        'Date *',
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
@@ -216,44 +219,13 @@ class _AddAssignmentDialogState extends State<AddAssignmentDialog> {
 
                       const SizedBox(height: 16),
 
-                      // Priority
-                      const Text(
-                        'Priority *',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _buildPriorityButton(
-                                'High', AppColors.highPriority),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _buildPriorityButton(
-                                'Medium', AppColors.mediumPriority),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _buildPriorityButton(
-                                'Low', AppColors.lowPriority),
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 24),
-
                       // Buttons
                       Row(
                         children: [
                           Expanded(
                             child: CustomButton(
-                              text: 'Add Assignment',
-                              onPressed: _saveAssignment,
+                              text: 'Add Session',
+                              onPressed: _saveSession,
                               icon: Icons.check,
                             ),
                           ),
@@ -279,32 +251,28 @@ class _AddAssignmentDialogState extends State<AddAssignmentDialog> {
     );
   }
 
-  Widget _buildPriorityButton(String priority, Color color) {
-    final isSelected = _selectedPriority == priority;
-
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedPriority = priority;
-        });
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(
-          color: isSelected ? color : color,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Center(
-          child: Text(
-            priority,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: isSelected ? AppColors.textWhite : color,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+  //     onTap: () {
+  //       setState(() {
+  //         _selectedPriority = priority;
+  //       });
+  //     },
+  //     child: Container(
+  //       padding: const EdgeInsets.symmetric(vertical: 12),
+  //       decoration: BoxDecoration(
+  //         color: isSelected ? color : color.withOpacity(0.1),
+  //         borderRadius: BorderRadius.circular(8),
+  //       ),
+  //       child: Center(
+  //         child: Text(
+  //           priority,
+  //           style: TextStyle(
+  //             fontSize: 14,
+  //             fontWeight: FontWeight.w600,
+  //             color: isSelected ? AppColors.textWhite : color,
+  //           ),
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
 }

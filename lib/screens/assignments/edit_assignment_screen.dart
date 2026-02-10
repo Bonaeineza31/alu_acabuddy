@@ -29,7 +29,8 @@ class _EditAssignmentDialogState extends State<EditAssignmentDialog> {
   void initState() {
     super.initState();
     _titleController = TextEditingController(text: widget.assignment.title);
-    _courseController = TextEditingController(text: widget.assignment.courseName);
+    _courseController =
+        TextEditingController(text: widget.assignment.courseName);
     _selectedDate = widget.assignment.dueDate;
     _selectedPriority = widget.assignment.priority;
   }
@@ -71,7 +72,8 @@ class _EditAssignmentDialogState extends State<EditAssignmentDialog> {
 
   void _saveChanges() {
     if (_formKey.currentState!.validate()) {
-      final assignmentProvider = Provider.of<AssignmentProvider>(context, listen: false);
+      final assignmentProvider =
+          Provider.of<AssignmentProvider>(context, listen: false);
 
       final updatedAssignment = widget.assignment.copyWith(
         title: _titleController.text.trim(),
@@ -80,7 +82,8 @@ class _EditAssignmentDialogState extends State<EditAssignmentDialog> {
         priority: _selectedPriority,
       );
 
-      assignmentProvider.updateAssignment(widget.assignment.id, updatedAssignment);
+      assignmentProvider.updateAssignment(
+          widget.assignment.id, updatedAssignment);
       Navigator.pop(context);
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -230,15 +233,18 @@ class _EditAssignmentDialogState extends State<EditAssignmentDialog> {
                       Row(
                         children: [
                           Expanded(
-                            child: _buildPriorityButton('High', AppColors.highPriority),
+                            child: _buildPriorityButton(
+                                'High', AppColors.highPriority),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
-                            child: _buildPriorityButton('Medium', AppColors.mediumPriority),
+                            child: _buildPriorityButton(
+                                'Medium', AppColors.mediumPriority),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
-                            child: _buildPriorityButton('Low', AppColors.lowPriority),
+                            child: _buildPriorityButton(
+                                'Low', AppColors.lowPriority),
                           ),
                         ],
                       ),
@@ -289,7 +295,7 @@ class _EditAssignmentDialogState extends State<EditAssignmentDialog> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected ? color : color.withOpacity(0.1),
+          color: isSelected ? color : color,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Center(
