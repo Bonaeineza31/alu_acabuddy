@@ -3,95 +3,83 @@ import 'package:provider/provider.dart';
 import '../../providers/assignment_provider.dart';
 import '../../providers/attendance_provider.dart';
 import '../../providers/session_provider.dart';
+import '../../providers/user_provider.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/helpers.dart';
 import '../attendance/attendance_screen.dart';
+import '../auth/auth_screen.dart';
 
 class HomeDashboard extends StatelessWidget {
   const HomeDashboard({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final attendanceProvider = Provider.of<AttendanceProvider>(context);
-    final assignmentProvider = Provider.of<AssignmentProvider>(context);
-    final sessionProvider = Provider.of<SessionProvider>(context);
+    final ap = Provider.of<AttendanceProvider>(context);
+    final asp = Provider.of<AssignmentProvider>(context);
+    final sp = Provider.of<SessionProvider>(context);
+    final up = Provider.of<UserProvider>(context);
+    
+    final firstName = up.currentUser?.fullName.split(' ').first ?? 'Student';
 
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // Header - Matching Reference Design
+            // Header
             Container(
               width: double.infinity,
               padding: const EdgeInsets.only(top: 50, left: 20, right: 20, bottom: 24),
               decoration: const BoxDecoration(
                 color: AppColors.primary,
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(24),
-                  bottomRight: Radius.circular(24),
-                ),
+                borderRadius: BorderRadius.only(bottomLeft: Radius.circular(24), bottomRight: Radius.circular(24)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Top row - Icon and Week
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Icon(
-                          Icons.home,
-                          color: Colors.white,
-                          size: 20,
-                        ),
+                        width: 50,
+                        height: 50,
+                        decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(10)),
+                        child: const Center(child: Text('ALU', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold))),
                       ),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          'Week ${Helpers.getCurrentWeek()}',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w500,
+                        decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(12)),
+                        child: Text('Week ${Helpers.getCurrentWeek()}', style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w500)),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Text('Welcome back, $firstName! 👋', style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 4),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(Helpers.formatDate(DateTime.now()), style: const TextStyle(color: Colors.white70, fontSize: 14)),
+                      GestureDetector(
+                        onTap: () {
+                          up.logout();
+                          Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (_) => const AuthScreen()), (route) => false);
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(8)),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [Icon(Icons.logout, color: Colors.white, size: 16), SizedBox(width: 6), Text('Logout', style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w500))],
                           ),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
-                  // Welcome Message
-                  const Text(
-                    'Welcome back, Bonae! 👋',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  // Date
-                  Text(
-                    Helpers.formatDate(DateTime.now()),
-                    style: const TextStyle(
-                      color: Colors.white70,
-                      fontSize: 14,
-                    ),
-                  ),
                 ],
               ),
             ),
 
-            // Content
             Padding(
               padding: const EdgeInsets.all(20),
               child: Column(
@@ -100,55 +88,29 @@ class HomeDashboard extends StatelessWidget {
                   // Stats Cards
                   Row(
                     children: [
-                      Expanded(
-                        child: _buildAttendanceCard(context, attendanceProvider),
-                      ),
+                      Expanded(child: _card(context, '${ap.attendancePercentage.toStringAsFixed(0)}%', 'Attendance Rate', ap.isBelowMinimum ? AppColors.danger : AppColors.success, Icons.calendar_today, true)),
                       const SizedBox(width: 15),
-                      Expanded(
-                        child: _buildTasksCard(assignmentProvider),
-                      ),
+                      Expanded(child: _card(context, '${asp.pendingCount}', '${asp.completedCount} of ${asp.assignments.length} complete', AppColors.primary, Icons.assignment, false)),
                     ],
                   ),
 
-                  // At-Risk Warning
-                  if (attendanceProvider.isBelowMinimum)
+                  if (ap.isBelowMinimum)
                     Container(
                       margin: const EdgeInsets.only(top: 16),
                       padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(
-                        color: AppColors.danger.withOpacity(0.1),
-                        border: Border.all(color: AppColors.danger),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Row(
-                        children: [
-                          Icon(Icons.warning_amber_rounded, color: AppColors.danger, size: 20),
-                          SizedBox(width: 10),
-                          Expanded(
-                            child: Text(
-                              'AT RISK: Keep attendance above 75%!',
-                              style: TextStyle(
-                                color: AppColors.danger,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 13,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                      decoration: BoxDecoration(color: AppColors.danger.withOpacity(0.1), border: Border.all(color: AppColors.danger), borderRadius: BorderRadius.circular(12)),
+                      child: const Row(children: [Icon(Icons.warning_amber_rounded, color: AppColors.danger, size: 20), SizedBox(width: 10), Expanded(child: Text('AT RISK: Keep attendance above 75%!', style: TextStyle(color: AppColors.danger, fontWeight: FontWeight.w600, fontSize: 13)))]),
                     ),
 
-                  // Today's Schedule
                   const SizedBox(height: 24),
-                  _buildSectionHeader("Today's Schedule"),
+                  _header("Today's Schedule"),
                   const SizedBox(height: 12),
-                  _buildTodaySchedule(sessionProvider),
+                  _sessions(sp.todaySessions),
 
-                  // Due This Week
                   const SizedBox(height: 24),
-                  _buildSectionHeader('Due This Week'),
+                  _header('Due This Week'),
                   const SizedBox(height: 12),
-                  _buildDueThisWeek(assignmentProvider),
+                  _tasks(asp.upcomingAssignments.take(3).toList()),
                 ],
               ),
             ),
@@ -158,322 +120,108 @@ class HomeDashboard extends StatelessWidget {
     );
   }
 
-  // Attendance Card
-  Widget _buildAttendanceCard(BuildContext context, AttendanceProvider provider) {
+  Widget _card(BuildContext ctx, String title, String subtitle, Color color, IconData icon, bool arrow) {
     return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const AttendanceScreen()),
-        );
-      },
+      onTap: arrow ? () => Navigator.push(ctx, MaterialPageRoute(builder: (_) => const AttendanceScreen())) : null,
       child: Container(
         padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(
-          color: provider.isBelowMinimum ? AppColors.danger : AppColors.success,
-          borderRadius: BorderRadius.circular(16),
-        ),
+        decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(16)),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: const [
-                Icon(Icons.calendar_today, color: Colors.white, size: 22),
-                Icon(Icons.arrow_forward, color: Colors.white, size: 20),
-              ],
-            ),
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Icon(icon, color: Colors.white, size: 22), if (arrow) const Icon(Icons.arrow_forward, color: Colors.white, size: 20)]),
             const SizedBox(height: 12),
-            Text(
-              '${provider.attendancePercentage.toStringAsFixed(0)}%',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            Text(title, style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
             const SizedBox(height: 2),
-            const Text(
-              'Attendance Rate',
-              style: TextStyle(
-                color: Colors.white70,
-                fontSize: 12,
-              ),
-            ),
+            Text(subtitle, style: const TextStyle(color: Colors.white70, fontSize: 11)),
           ],
         ),
       ),
     );
   }
 
-  // Tasks Card
-  Widget _buildTasksCard(AssignmentProvider provider) {
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: AppColors.primary,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Icon(Icons.assignment, color: Colors.white, size: 22),
-          const SizedBox(height: 12),
-          Text(
-            '${provider.pendingCount}',
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 32,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            '${provider.completedCount} of ${provider.assignments.length} complete',
-            style: const TextStyle(
-              color: Colors.white70,
-              fontSize: 11,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Section Header
-  Widget _buildSectionHeader(String title) {
+  Widget _header(String title) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Row(
-          children: [
-            Container(
-              width: 4,
-              height: 20,
-              decoration: BoxDecoration(
-                color: AppColors.primary,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(width: 10),
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
-              ),
-            ),
-          ],
-        ),
+        Container(width: 4, height: 20, color: AppColors.primary, margin: const EdgeInsets.only(right: 10)),
+        Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        const Spacer(),
         const Icon(Icons.more_horiz, color: AppColors.textSecondary, size: 20),
       ],
     );
   }
 
-  // Today's Schedule
-  Widget _buildTodaySchedule(SessionProvider provider) {
-    final sessions = provider.todaySessions;
-
-    if (sessions.isEmpty) {
-      return _buildEmptyState('No sessions scheduled for today', Icons.event_note);
-    }
-
+  Widget _sessions(List sessions) {
+    if (sessions.isEmpty) return _empty('No sessions scheduled for today', Icons.event_note);
     return Column(
-      children: sessions.map((session) {
-        return Container(
-          margin: const EdgeInsets.only(bottom: 10),
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: AppColors.cardBackground,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: _getSessionColor(session.sessionType),
-              width: 2,
-            ),
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      session.title,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Row(
-                      children: [
-                        const Icon(Icons.access_time, size: 13, color: AppColors.textSecondary),
-                        const SizedBox(width: 4),
-                        Text(
-                          '${session.startTime} - ${session.endTime}',
-                          style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
-                        ),
-                        if (session.location.isNotEmpty) ...[
-                          const SizedBox(width: 10),
-                          const Icon(Icons.location_on, size: 13, color: AppColors.textSecondary),
-                          const SizedBox(width: 4),
-                          Flexible(
-                            child: Text(
-                              session.location,
-                              style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                decoration: BoxDecoration(
-                  color: _getSessionColor(session.sessionType),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(
-                  session.sessionType,
-                  style: const TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      }).toList(),
-    );
-  }
-
-  // Due This Week
-  Widget _buildDueThisWeek(AssignmentProvider provider) {
-    final assignments = provider.upcomingAssignments.take(3).toList();
-
-    if (assignments.isEmpty) {
-      return _buildEmptyState('No assignments due this week', Icons.assignment_outlined);
-    }
-
-    return Column(
-      children: assignments.map((assignment) {
-        return Container(
-          margin: const EdgeInsets.only(bottom: 10),
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: AppColors.cardBackground,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: _getPriorityColor(assignment.priority),
-              width: 2,
-            ),
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      assignment.title,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Row(
-                      children: [
-                        const Icon(Icons.book, size: 13, color: AppColors.textSecondary),
-                        const SizedBox(width: 4),
-                        Text(
-                          assignment.courseName,
-                          style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
-                        ),
-                        const SizedBox(width: 10),
-                        const Icon(Icons.calendar_today, size: 13, color: AppColors.textSecondary),
-                        const SizedBox(width: 4),
-                        Text(
-                          Helpers.formatDate(assignment.dueDate),
-                          style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                decoration: BoxDecoration(
-                  color: _getPriorityColor(assignment.priority),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(
-                  assignment.priority,
-                  style: const TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      }).toList(),
-    );
-  }
-
-  // Empty State
-  Widget _buildEmptyState(String message, IconData icon) {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: AppColors.cardBackground,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.divider),
-      ),
-      child: Center(
-        child: Column(
+      children: sessions.map((s) => Container(
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: _sc(s.sessionType), width: 2)),
+        child: Row(
           children: [
-            Icon(icon, size: 40, color: AppColors.textSecondary.withOpacity(0.5)),
-            const SizedBox(height: 8),
-            Text(
-              message,
-              style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(s.title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      const Icon(Icons.access_time, size: 13, color: AppColors.textSecondary),
+                      const SizedBox(width: 4),
+                      Text('${s.startTime} - ${s.endTime}', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                      if (s.location.isNotEmpty) ...[const SizedBox(width: 10), const Icon(Icons.location_on, size: 13, color: AppColors.textSecondary), const SizedBox(width: 4), Flexible(child: Text(s.location, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary), overflow: TextOverflow.ellipsis))],
+                    ],
+                  ),
+                ],
+              ),
             ),
+            Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5), decoration: BoxDecoration(color: _sc(s.sessionType), borderRadius: BorderRadius.circular(6)), child: Text(s.sessionType, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: Colors.white))),
           ],
         ),
-      ),
+      )).toList(),
     );
   }
 
-  // Helper: Get Session Color
-  Color _getSessionColor(String type) {
-    switch (type) {
-      case 'Class': return AppColors.classSession;
-      case 'Mastery Session': return AppColors.masterySession;
-      case 'Study Group': return AppColors.studyGroup;
-      case 'PSL Meeting': return AppColors.pslMeeting;
-      default: return AppColors.primary;
-    }
+  Widget _tasks(List assignments) {
+    if (assignments.isEmpty) return _empty('No assignments due this week', Icons.assignment_outlined);
+    return Column(
+      children: assignments.map((a) => Container(
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: _pc(a.priority), width: 2)),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(a.title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      const Icon(Icons.book, size: 13, color: AppColors.textSecondary),
+                      const SizedBox(width: 4),
+                      Text(a.courseName, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                      const SizedBox(width: 10),
+                      const Icon(Icons.calendar_today, size: 13, color: AppColors.textSecondary),
+                      const SizedBox(width: 4),
+                      Text(Helpers.formatDate(a.dueDate), style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            Container(padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5), decoration: BoxDecoration(color: _pc(a.priority), borderRadius: BorderRadius.circular(6)), child: Text(a.priority, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: Colors.white))),
+          ],
+        ),
+      )).toList(),
+    );
   }
 
-  // Helper: Get Priority Color
-  Color _getPriorityColor(String priority) {
-    switch (priority) {
-      case 'High': return AppColors.highPriority;
-      case 'Medium': return AppColors.mediumPriority;
-      case 'Low': return AppColors.lowPriority;
-      default: return AppColors.textSecondary;
-    }
-  }
+  Widget _empty(String msg, IconData icon) => Container(padding: const EdgeInsets.all(24), decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.divider)), child: Center(child: Column(children: [Icon(icon, size: 40, color: Colors.grey), const SizedBox(height: 8), Text(msg, style: const TextStyle(color: AppColors.textSecondary, fontSize: 13))])));
+
+  Color _sc(String type) => type == 'Class' ? AppColors.classSession : type == 'Mastery Session' ? AppColors.masterySession : type == 'Study Group' ? AppColors.studyGroup : type == 'PSL Meeting' ? AppColors.pslMeeting : AppColors.primary;
+  Color _pc(String priority) => priority == 'High' ? AppColors.highPriority : priority == 'Medium' ? AppColors.mediumPriority : AppColors.lowPriority;
 }
