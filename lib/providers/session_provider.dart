@@ -6,6 +6,10 @@ import '../utils/helpers.dart';
 class SessionProvider extends ChangeNotifier {
   final List<Session> _sessions = [];
 
+  var sessionsSortedByDate;
+
+  var completedCount;
+
   /// Get all sessions
   List<Session> get sessions => _sessions;
 
@@ -22,8 +26,9 @@ class SessionProvider extends ChangeNotifier {
     final endOfWeek = startOfWeek.add(const Duration(days: 6));
 
     return _sessions.where((session) {
-      return session.date.isAfter(startOfWeek.subtract(const Duration(days: 1))) &&
-             session.date.isBefore(endOfWeek.add(const Duration(days: 1)));
+      return session.date
+              .isAfter(startOfWeek.subtract(const Duration(days: 1))) &&
+          session.date.isBefore(endOfWeek.add(const Duration(days: 1)));
     }).toList()
       ..sort((a, b) => a.date.compareTo(b.date));
   }
@@ -32,8 +37,8 @@ class SessionProvider extends ChangeNotifier {
   List<Session> getSessionsByDate(DateTime date) {
     return _sessions.where((session) {
       return session.date.year == date.year &&
-             session.date.month == date.month &&
-             session.date.day == date.day;
+          session.date.month == date.month &&
+          session.date.day == date.day;
     }).toList()
       ..sort((a, b) => a.startTime.compareTo(b.startTime));
   }

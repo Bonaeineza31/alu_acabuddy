@@ -111,7 +111,7 @@ class AssignmentsScreen extends StatelessWidget {
                           Icon(
                             Icons.assignment_outlined,
                             size: 80,
-                            color: AppColors.textSecondary.withOpacity(0.5),
+                            color: AppColors.textSecondary,
                           ),
                           const SizedBox(height: 16),
                           const Text(

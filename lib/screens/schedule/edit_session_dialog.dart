@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../models/assignment.dart';
 import '../../providers/assignment_provider.dart';
+import '../../providers/session_provider.dart';
 import '../../utils/app_colors.dart';
 import '../../widgets/common/text_field.dart';
 import '../../widgets/common/button.dart';
@@ -149,14 +150,14 @@ class _EditAssignmentDialogState extends State<EditAssignmentDialog> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Assignment Title
+                      // Session Title
                       CustomTextField(
-                        label: 'Assignment Title *',
-                        hint: 'Enter assignment title',
+                        label: 'Session Title *',
+                        hint: 'Enter session title',
                         controller: _titleController,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Please enter assignment title';
+                            return 'Enter session title';
                           }
                           return null;
                         },
@@ -166,12 +167,12 @@ class _EditAssignmentDialogState extends State<EditAssignmentDialog> {
 
                       // Course
                       CustomTextField(
-                        label: 'Course *',
-                        hint: 'Enter course name',
+                        label: 'Session Type *',
+                        hint: 'Class or Event',
                         controller: _courseController,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Please enter course name';
+                            return 'Please enter session type';
                           }
                           return null;
                         },
@@ -179,9 +180,9 @@ class _EditAssignmentDialogState extends State<EditAssignmentDialog> {
 
                       const SizedBox(height: 16),
 
-                      // Due Date
+                      // Date
                       const Text(
-                        'Due Date *',
+                        'Date *',
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
@@ -220,36 +221,33 @@ class _EditAssignmentDialogState extends State<EditAssignmentDialog> {
 
                       const SizedBox(height: 16),
 
-                      // Priority
-                      const Text(
-                        'Priority *',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _buildPriorityButton(
-                                'High', AppColors.highPriority),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _buildPriorityButton(
-                                'Medium', AppColors.mediumPriority),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _buildPriorityButton(
-                                'Low', AppColors.lowPriority),
-                          ),
-                        ],
-                      ),
+                      // // Priority
+                      // const Text(
+                      //   'Priority *',
+                      //   style: TextStyle(
+                      //     fontSize: 14,
+                      //     fontWeight: FontWeight.w500,
+                      //     color: AppColors.textPrimary,
+                      //   ),
+                      // ),
+                      // const SizedBox(height: 12),
+                      // Row(
+                      //   children: [
+                      //     Expanded(
+                      //       child: _buildPriorityButton('High', AppColors.highPriority),
+                      //     ),
+                      //     const SizedBox(width: 12),
+                      //     Expanded(
+                      //       child: _buildPriorityButton('Medium', AppColors.mediumPriority),
+                      //     ),
+                      //     const SizedBox(width: 12),
+                      //     Expanded(
+                      //       child: _buildPriorityButton('Low', AppColors.lowPriority),
+                      //     ),
+                      //   ],
+                      // ),
 
-                      const SizedBox(height: 24),
+                      // const SizedBox(height: 24),
 
                       // Buttons
                       Row(
@@ -283,32 +281,32 @@ class _EditAssignmentDialogState extends State<EditAssignmentDialog> {
     );
   }
 
-  Widget _buildPriorityButton(String priority, Color color) {
-    final isSelected = _selectedPriority == priority;
+//   Widget _buildPriorityButton(String priority, Color color) {
+//     final isSelected = _selectedPriority == priority;
 
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedPriority = priority;
-        });
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(
-          color: isSelected ? color : color,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Center(
-          child: Text(
-            priority,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: isSelected ? AppColors.textWhite : color,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+//     return GestureDetector(
+//       onTap: () {
+//         setState(() {
+//           _selectedPriority = priority;
+//         });
+//       },
+//       child: Container(
+//         padding: const EdgeInsets.symmetric(vertical: 12),
+//         decoration: BoxDecoration(
+//           color: isSelected ? color : color.withOpacity(0.1),
+//           borderRadius: BorderRadius.circular(8),
+//         ),
+//         child: Center(
+//           child: Text(
+//             priority,
+//             style: TextStyle(
+//               fontSize: 14,
+//               fontWeight: FontWeight.w600,
+//               color: isSelected ? AppColors.textWhite : color,
+//             ),
+//           ),
+//         ),
+//       ),
+//     );
+//   }
 }

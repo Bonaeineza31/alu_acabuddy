@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'providers/user_provider.dart';
 import 'providers/assignment_provider.dart';
 import 'providers/attendance_provider.dart';
+import 'screens/schedule/schedule_screen.dart';
 import 'providers/session_provider.dart';
 import 'screens/auth/auth_screen.dart';
 import 'utils/app_colors.dart';

@@ -1,25 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../models/assignment.dart';
-import '../../providers/assignment_provider.dart';
+import 'edit_session_dialog.dart';
+import '../../models/session.dart';
+import '../../providers/session_provider.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/constants.dart';
 import '../../widgets/common/text_field.dart';
 import '../../widgets/common/button.dart';
 
-class AddAssignmentDialog extends StatefulWidget {
-  const AddAssignmentDialog({super.key});
+class AddSessionDialog extends StatefulWidget {
+  const AddSessionDialog({super.key});
 
   @override
-  State<AddAssignmentDialog> createState() => _AddAssignmentDialogState();
+  State<AddSessionDialog> createState() => _AddSessionDialogState();
 }
 
-class _AddAssignmentDialogState extends State<AddAssignmentDialog> {
+class _AddSessionDialogState extends State<AddSessionDialog> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _courseController = TextEditingController();
   DateTime? _selectedDate;
-  String _selectedPriority = 'Medium';
+  // String _selectedPriority = 'Medium';
 
   @override
   void dispose() {
@@ -56,31 +58,32 @@ class _AddAssignmentDialogState extends State<AddAssignmentDialog> {
     }
   }
 
-  void _saveAssignment() {
+  void _saveSession() {
     if (_formKey.currentState!.validate() && _selectedDate != null) {
       final assignmentProvider =
-          Provider.of<AssignmentProvider>(context, listen: false);
+          Provider.of<SessionProvider>(context, listen: false);
 
-      final newAssignment = Assignment(
+      final newSession = Session(
         title: _titleController.text.trim(),
-        courseName: _courseController.text.trim(),
-        dueDate: _selectedDate!,
-        priority: _selectedPriority,
+        date: _selectedDate!,
+        startTime: '',
+        endTime: '',
+        sessionType: '',
       );
 
-      assignmentProvider.addAssignment(newAssignment);
+      assignmentProvider.addSession(newSession);
       Navigator.pop(context);
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Assignment added successfully!'),
+          content: Text('Session added successfully!'),
           backgroundColor: AppColors.success,
         ),
       );
     } else if (_selectedDate == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please select a due date'),
+          content: Text('Please select a date'),
           backgroundColor: AppColors.danger,
         ),
       );
@@ -88,57 +91,49 @@ class _AddAssignmentDialogState extends State<AddAssignmentDialog> {
   }
 
   @override
-  @override
-Widget build(BuildContext context) {
-  return Dialog(
-    backgroundColor: Colors.transparent,
-    insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
-    child: Container(
-      constraints: const BoxConstraints(maxWidth: 500, maxHeight: 600),
-      decoration: BoxDecoration(
-        color: AppColors.cardBackground,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Header
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-            decoration: const BoxDecoration(
-              color: AppColors.primary,
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(20),
-                topRight: Radius.circular(20),
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      insetPadding: const EdgeInsets.all(20),
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 500),
+        decoration: BoxDecoration(
+          color: AppColors.cardBackground,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Header
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: const BoxDecoration(
+                color: AppColors.primary,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Add New Session',
+                    style: TextStyle(
+                      color: AppColors.textWhite,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close, color: AppColors.textWhite),
+                    onPressed: () => Navigator.pop(context),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                ],
               ),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Add New Assignment',
-                  style: TextStyle(
-                    color: AppColors.textWhite,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.close, color: AppColors.textWhite),
-                  onPressed: () => Navigator.pop(context),
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                ),
-              ],
-            ),
-          ),
 
             // Form Content
             Flexible(
@@ -149,14 +144,14 @@ Widget build(BuildContext context) {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Assignment Title
+                      // Session Title
                       CustomTextField(
-                        label: 'Assignment Title *',
-                        hint: 'Enter assignment title',
+                        label: 'Session Title *',
+                        hint: 'Enter session title',
                         controller: _titleController,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Please enter assignment title';
+                            return 'Please enter session title';
                           }
                           return null;
                         },
@@ -164,14 +159,14 @@ Widget build(BuildContext context) {
 
                       const SizedBox(height: 16),
 
-                      // Course
+                      // Session
                       CustomTextField(
-                        label: 'Course *',
-                        hint: 'Enter course name',
+                        label: 'Session Type *',
+                        hint: 'Class or Event',
                         controller: _courseController,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Please enter course name';
+                            return 'Please enter session type';
                           }
                           return null;
                         },
@@ -179,9 +174,9 @@ Widget build(BuildContext context) {
 
                       const SizedBox(height: 16),
 
-                      // Due Date
+                      // Date
                       const Text(
-                        'Due Date *',
+                        'Date *',
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
@@ -224,60 +219,27 @@ Widget build(BuildContext context) {
 
                       const SizedBox(height: 16),
 
-                      // Priority
-                      const Text(
-                        'Priority *',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
+                      // Buttons
                       Row(
                         children: [
                           Expanded(
-                            child: _buildPriorityButton(
-                                'High', AppColors.highPriority),
+                            child: CustomButton(
+                              text: 'Add Session',
+                              onPressed: _saveSession,
+                              icon: Icons.check,
+                            ),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
-                            child: _buildPriorityButton(
-                                'Medium', AppColors.mediumPriority),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _buildPriorityButton(
-                                'Low', AppColors.lowPriority),
+                            child: CustomButton(
+                              text: 'Cancel',
+                              onPressed: () => Navigator.pop(context),
+                              backgroundColor: AppColors.background,
+                              textColor: AppColors.textPrimary,
+                            ),
                           ),
                         ],
                       ),
-
-                      const SizedBox(height: 24),
-
-                      // Buttons
-                      Row(
-  children: [
-    Expanded(
-      child: CustomButton(
-        text: 'Add Assignment',
-        onPressed: _saveAssignment,
-        icon: Icons.add_circle_outline,
-      ),
-    ),
-    const SizedBox(width: 12),
-    // Cancel button without Expanded - fixed width
-    SizedBox(
-      width: 100, 
-      child: CustomButton(
-        text: 'Cancel',
-        onPressed: () => Navigator.pop(context),
-        backgroundColor: AppColors.background,
-        textColor: AppColors.textPrimary,
-      ),
-    ),
-  ],
-),
                     ],
                   ),
                 ),
@@ -289,32 +251,28 @@ Widget build(BuildContext context) {
     );
   }
 
-  Widget _buildPriorityButton(String priority, Color color) {
-    final isSelected = _selectedPriority == priority;
-
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedPriority = priority;
-        });
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(
-          color: isSelected ? color : color,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Center(
-          child: Text(
-            priority,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: isSelected ? AppColors.textWhite : color,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+  //     onTap: () {
+  //       setState(() {
+  //         _selectedPriority = priority;
+  //       });
+  //     },
+  //     child: Container(
+  //       padding: const EdgeInsets.symmetric(vertical: 12),
+  //       decoration: BoxDecoration(
+  //         color: isSelected ? color : color.withOpacity(0.1),
+  //         borderRadius: BorderRadius.circular(8),
+  //       ),
+  //       child: Center(
+  //         child: Text(
+  //           priority,
+  //           style: TextStyle(
+  //             fontSize: 14,
+  //             fontWeight: FontWeight.w600,
+  //             color: isSelected ? AppColors.textWhite : color,
+  //           ),
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
 }
