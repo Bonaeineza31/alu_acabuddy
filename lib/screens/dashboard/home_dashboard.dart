@@ -1,10 +1,7 @@
+import 'package:provider/provider.dart';
 import 'package:alu_acabuddy/providers/assignment_provider.dart';
 import 'package:alu_acabuddy/providers/attendance_provider.dart';
-import 'package:alu_acabuddy/screens/attendance/attendance_screen.dart';
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../../providers/user_provider.dart';
-import '../../utils/app_colors.dart';
+import 'package:alu_acabuddy/providers/session_provider.dart';
 
 /// Home Dashboard - Main screen after login
 class HomeDashboard extends StatelessWidget {
@@ -14,7 +11,8 @@ class HomeDashboard extends StatelessWidget {
   Widget build(BuildContext context) {
     final attendanceProvider = Provider.of<AttendanceProvider>(context);
     final assignmentProvider = Provider.of<AssignmentProvider>(context);
-
+    final sessionProvider = Provider.of<SessionProvider>(context);
+   
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SingleChildScrollView(

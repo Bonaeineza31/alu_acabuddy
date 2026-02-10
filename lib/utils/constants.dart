@@ -1,4 +1,4 @@
-import 'dart:ui';
+import 'package:flutter/material.dart';
 
 /// App-wide constants
 class AppConstants {
@@ -6,41 +6,21 @@ class AppConstants {
   static const String appName = 'ALU AcaBuddy';
   static const String appVersion = '1.0.0';
   
-  // Attendance
+  // Attendance logic
   static const double minimumAttendancePercentage = 75.0;
   static const String attendanceWarningMessage = 
-      'Warning: Your attendance is below 75%';
+      'AT RISK: Keep attendance above 75%!'; // Matches your Figma
   
   // Date Formats
   static const String dateFormat = 'MMM dd, yyyy';
   static const String timeFormat = 'HH:mm';
-  static const String dateTimeFormat = 'MMM dd, yyyy HH:mm';
   
   // Assignment Priority Levels
   static const String priorityHigh = 'High';
   static const String priorityMedium = 'Medium';
   static const String priorityLow = 'Low';
   
-  static const List<String> priorityLevels = [
-    priorityHigh,
-    priorityMedium,
-    priorityLow,
-  ];
-  
-  // Session Types
-  static const String sessionTypeClass = 'Class';
-  static const String sessionTypeMastery = 'Mastery Session';
-  static const String sessionTypeStudyGroup = 'Study Group';
-  static const String sessionTypePSL = 'PSL Meeting';
-  
-  static const List<String> sessionTypes = [
-    sessionTypeClass,
-    sessionTypeMastery,
-    sessionTypeStudyGroup,
-    sessionTypePSL,
-  ];
-  
-  // Attendance Status
+  // Attendance Status (Used by AttendanceProvider)
   static const String attendancePresent = 'Present';
   static const String attendanceAbsent = 'Absent';
   static const String attendanceLate = 'Late';
@@ -48,12 +28,9 @@ class AppConstants {
   // UI Constants
   static const double defaultPadding = 16.0;
   static const double defaultBorderRadius = 12.0;
-  static const double cardElevation = 2.0;
   
-  // Days to show upcoming assignments
-  static const int upcomingAssignmentDays = 7;
-
-  static Color? get successColor => null;
-
-  static Color? get dangerColor => null;
+  // FIXED: Instead of 'null', link these to your real colors or standard Flutter colors
+  static const Color successColor = Colors.green;
+  static const Color dangerColor = Colors.red;
+  static const Color warningColor = Colors.orange;
 }

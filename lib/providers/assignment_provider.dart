@@ -1,4 +1,3 @@
-import 'package:alu_acabuddy/models/session.dart';
 import 'package:flutter/material.dart';
 import '../models/assignment.dart';
 import '../utils/helpers.dart';
@@ -7,7 +6,32 @@ import '../utils/constants.dart';
 /// Provider for managing assignments/tasks
 class AssignmentProvider extends ChangeNotifier {
   // In-memory storage - data lives only during app session
-  final List<Assignment> _assignments = [];
+  final List<Assignment> _assignments = [
+    Assignment(
+      id: 'a1',
+      title: 'Entrepreneurship Case Study',
+      courseName: 'Entrepreneurial Leadership',
+      dueDate: DateTime.now().add(Duration(days: 1)),
+      priority: 'High', // UI will use this for the RED tag
+      isCompleted: false,
+    ),
+    Assignment(
+      id: 'a2',
+      title: 'Data Structures Problem Set',
+      courseName: 'Computer Science',
+      dueDate: DateTime.now().add(Duration(days: 3)),
+      priority: 'High',
+      isCompleted: false,
+    ),
+    Assignment(
+      id: 'a3',
+      title: 'African History Essay',
+      courseName: 'African Renaissance',
+      dueDate: DateTime.now().add(Duration(days: 5)),
+      priority: 'Medium', // UI will use this for the ORANGE tag
+      isCompleted: false,
+    ),
+  ];
 
   /// Get all assignments
   List<Assignment> get assignments => _assignments;
@@ -94,6 +118,3 @@ class AssignmentProvider extends ChangeNotifier {
         .where((a) => a.priority == priority && !a.isCompleted)
         .toList();
   }
-
-  void addSession(Session newSession) {}
-}
