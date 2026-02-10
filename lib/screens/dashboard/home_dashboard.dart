@@ -20,7 +20,7 @@ class HomeDashboard extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // --- SECTION 1: HEADER (Blue Box from Figma) ---
+            // --- SECTION 1: HEADER (The Blue Box from Figma) ---
             Container(
               padding: const EdgeInsets.only(
                   top: 60, left: 20, right: 20, bottom: 30),
