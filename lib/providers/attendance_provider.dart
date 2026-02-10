@@ -6,39 +6,34 @@ import '../utils/constants.dart';
 class AttendanceProvider extends ChangeNotifier {
   List<Session> _sessions = [];
 
-  /// Update sessions list (called from SessionProvider)
+  // Update sessions list (called from SessionProvider)
   void updateSessions(List<Session> sessions) {
     _sessions = sessions;
     notifyListeners();
   }
 
-  /// Get total sessions tracked
   int get totalSessionsTracked {
     return _sessions.where((s) => s.attendanceStatus.isNotEmpty).length;
   }
 
-  /// Get present count
   int get presentCount {
     return _sessions
         .where((s) => s.attendanceStatus == AppConstants.attendancePresent)
         .length;
   }
 
-  /// Get late count
   int get lateCount {
     return _sessions
         .where((s) => s.attendanceStatus == AppConstants.attendanceLate)
         .length;
   }
 
-  /// Get absent count
   int get absentCount {
     return _sessions
         .where((s) => s.attendanceStatus == AppConstants.attendanceAbsent)
         .length;
   }
 
-  /// Calculate attendance percentage
   double get attendancePercentage {
     return Helpers.calculateAttendancePercentage(
       presentCount,
@@ -47,12 +42,10 @@ class AttendanceProvider extends ChangeNotifier {
     );
   }
 
-  /// Check if attendance is below minimum requirement
   bool get isBelowMinimum {
     return attendancePercentage < AppConstants.minimumAttendancePercentage;
   }
 
-  /// Get attendance status message
   String get attendanceStatusMessage {
     if (totalSessionsTracked == 0) {
       return 'No attendance recorded yet';
@@ -63,7 +56,6 @@ class AttendanceProvider extends ChangeNotifier {
     return 'Excellent! You meet the attendance requirement.';
   }
 
-  /// Get sessions attended this week
   int get weekAttendedCount {
     final now = DateTime.now();
     final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
@@ -78,7 +70,6 @@ class AttendanceProvider extends ChangeNotifier {
     }).length;
   }
 
-  /// Get attendance history
   List<Session> get attendanceHistory {
     return _sessions
         .where((s) => s.attendanceStatus.isNotEmpty)

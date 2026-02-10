@@ -1,17 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 import '../models/assignment.dart';
 import '../utils/helpers.dart';
-import '../utils/constants.dart';
 
-/// Provider for managing assignments/tasks
 class AssignmentProvider extends ChangeNotifier {
-  // In-memory storage - data lives only during app session
-  List<Assignment> _assignments= [];
+  List<Assignment> _assignments = [];
 
-  /// Get all assignments
   List<Assignment> get assignments => _assignments;
 
-  /// Get upcoming assignments (due within next 7 days)
+  // Load assignments from storage
+  Future<void> loadAssignments() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? assignmentsJson = prefs.getString('assignments');
+    
+    if (assignmentsJson != null) {
+      final List<dynamic> decoded = json.decode(assignmentsJson);
+      _assignments = decoded.map((item) => Assignment.fromMap(item)).toList();
+      notifyListeners();
+    }
+  }
+
+  // Save assignments to storage
+  Future<void> _saveAssignments() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String encoded = json.encode(_assignments.map((a) => a.toMap()).toList());
+    await prefs.setString('assignments', encoded);
+  }
+
   List<Assignment> get upcomingAssignments {
     return _assignments.where((assignment) {
       return !assignment.isCompleted && Helpers.isUpcoming(assignment.dueDate);
@@ -19,59 +35,54 @@ class AssignmentProvider extends ChangeNotifier {
       ..sort((a, b) => a.dueDate.compareTo(b.dueDate));
   }
 
-  /// Get assignments due today
   List<Assignment> get todayAssignments {
     return _assignments.where((assignment) {
       return !assignment.isCompleted && Helpers.isToday(assignment.dueDate);
     }).toList();
   }
 
-  /// Get pending (incomplete) assignments count
   int get pendingCount {
     return _assignments.where((a) => !a.isCompleted).length;
   }
 
-  /// Get completed assignments count
   int get completedCount {
     return _assignments.where((a) => a.isCompleted).length;
   }
 
-  /// Get overdue assignments
   List<Assignment> get overdueAssignments {
     return _assignments.where((assignment) {
       return Helpers.isOverdue(assignment.dueDate, assignment.isCompleted);
     }).toList();
   }
 
-  /// Add new assignment
   void addAssignment(Assignment assignment) {
     _assignments.add(assignment);
+    _saveAssignments();
     notifyListeners();
   }
 
-  /// Update existing assignment
   void updateAssignment(String id, Assignment updatedAssignment) {
     final index = _assignments.indexWhere((a) => a.id == id);
     if (index != -1) {
       _assignments[index] = updatedAssignment;
+      _saveAssignments();
       notifyListeners();
     }
   }
 
-  /// Toggle assignment completion status
   void toggleCompletion(String id) {
     final assignment = _assignments.firstWhere((a) => a.id == id);
     assignment.isCompleted = !assignment.isCompleted;
+    _saveAssignments();
     notifyListeners();
   }
 
-  /// Delete assignment
   void deleteAssignment(String id) {
     _assignments.removeWhere((a) => a.id == id);
+    _saveAssignments();
     notifyListeners();
   }
 
-  /// Get assignment by ID
   Assignment? getAssignmentById(String id) {
     try {
       return _assignments.firstWhere((a) => a.id == id);
@@ -80,14 +91,12 @@ class AssignmentProvider extends ChangeNotifier {
     }
   }
 
-  /// Get assignments sorted by due date
   List<Assignment> get assignmentsSortedByDate {
     final list = List<Assignment>.from(_assignments);
     list.sort((a, b) => a.dueDate.compareTo(b.dueDate));
     return list;
   }
 
-  /// Get assignments by priority
   List<Assignment> getAssignmentsByPriority(String priority) {
     return _assignments
         .where((a) => a.priority == priority && !a.isCompleted)

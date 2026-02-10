@@ -1,21 +1,38 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 import '../models/session.dart';
 import '../utils/helpers.dart';
 
-/// Provider for managing academic sessions (classes, study groups, etc.)
 class SessionProvider extends ChangeNotifier {
-  final List<Session> _sessions = [];
+  List<Session> _sessions = [];
 
-  /// Get all sessions
   List<Session> get sessions => _sessions;
 
-  /// Get today's sessions
+  // Load sessions from storage
+  Future<void> loadSessions() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? sessionsJson = prefs.getString('sessions');
+    
+    if (sessionsJson != null) {
+      final List<dynamic> decoded = json.decode(sessionsJson);
+      _sessions = decoded.map((item) => Session.fromMap(item)).toList();
+      notifyListeners();
+    }
+  }
+
+  // Save sessions to storage
+  Future<void> _saveSessions() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String encoded = json.encode(_sessions.map((s) => s.toMap()).toList());
+    await prefs.setString('sessions', encoded);
+  }
+
   List<Session> get todaySessions {
     return _sessions.where((session) => session.isToday).toList()
       ..sort((a, b) => a.startTime.compareTo(b.startTime));
   }
 
-  /// Get this week's sessions
   List<Session> get weekSessions {
     final now = DateTime.now();
     final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
@@ -28,7 +45,6 @@ class SessionProvider extends ChangeNotifier {
       ..sort((a, b) => a.date.compareTo(b.date));
   }
 
-  /// Get sessions for a specific date
   List<Session> getSessionsByDate(DateTime date) {
     return _sessions.where((session) {
       return session.date.year == date.year &&
@@ -38,35 +54,37 @@ class SessionProvider extends ChangeNotifier {
       ..sort((a, b) => a.startTime.compareTo(b.startTime));
   }
 
-  /// Add new session
   void addSession(Session session) {
     _sessions.add(session);
+    _saveSessions();
     notifyListeners();
   }
 
-  /// Update session
   void updateSession(String id, Session updatedSession) {
     final index = _sessions.indexWhere((s) => s.id == id);
     if (index != -1) {
       _sessions[index] = updatedSession;
+      _saveSessions();
       notifyListeners();
     }
   }
 
-  /// Delete session
   void deleteSession(String id) {
     _sessions.removeWhere((s) => s.id == id);
+    _saveSessions();
     notifyListeners();
   }
 
-  /// Mark attendance for a session
+  // Mark attendance for a session
   void markAttendance(String sessionId, String status) {
-    final session = _sessions.firstWhere((s) => s.id == sessionId);
-    session.attendanceStatus = status;
-    notifyListeners();
+    final index = _sessions.indexWhere((s) => s.id == sessionId);
+    if (index != -1) {
+      _sessions[index].attendanceStatus = status;
+      _saveSessions();
+      notifyListeners();
+    }
   }
 
-  /// Get session by ID
   Session? getSessionById(String id) {
     try {
       return _sessions.firstWhere((s) => s.id == id);
@@ -75,9 +93,6 @@ class SessionProvider extends ChangeNotifier {
     }
   }
 
-  /// Get total sessions count
   int get totalSessions => _sessions.length;
-
-  /// Get sessions this week count
   int get weekSessionsCount => weekSessions.length;
 }

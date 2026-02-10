@@ -3,12 +3,12 @@ import 'package:provider/provider.dart';
 import 'providers/user_provider.dart';
 import 'providers/assignment_provider.dart';
 import 'providers/attendance_provider.dart';
-import 'screens/schedule/schedule_screen.dart';
 import 'providers/session_provider.dart';
 import 'screens/auth/auth_screen.dart';
 import 'utils/app_colors.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized(); // Required for async
   runApp(const MyApp());
 }
 
@@ -21,8 +21,8 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => AssignmentProvider()),
-        ChangeNotifierProvider(create: (_) => AttendanceProvider()),
         ChangeNotifierProvider(create: (_) => SessionProvider()),
+        ChangeNotifierProvider(create: (_) => AttendanceProvider()),
       ],
       child: MaterialApp(
         title: 'ALU AcaBuddy',
@@ -41,8 +41,42 @@ class MyApp extends StatelessWidget {
           ),
           useMaterial3: true,
         ),
-        home: const AuthScreen(),
+        home: const DataLoader(),
       ),
     );
+  }
+}
+
+// Widget to load data before showing UI
+class DataLoader extends StatefulWidget {
+  const DataLoader({super.key});
+
+  @override
+  State<DataLoader> createState() => _DataLoaderState();
+}
+
+class _DataLoaderState extends State<DataLoader> {
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    final assignmentProvider = Provider.of<AssignmentProvider>(context, listen: false);
+    final sessionProvider = Provider.of<SessionProvider>(context, listen: false);
+    final attendanceProvider = Provider.of<AttendanceProvider>(context, listen: false);
+
+    // Load data
+    await assignmentProvider.loadAssignments();
+    await sessionProvider.loadSessions();
+    
+    // Sync attendance with sessions
+    attendanceProvider.updateSessions(sessionProvider.sessions);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return const AuthScreen();
   }
 }
