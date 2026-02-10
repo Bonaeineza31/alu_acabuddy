@@ -18,8 +18,8 @@ class _MainNavigationState extends State<MainNavigation> {
   // List of screens
   final List<Widget> _screens = [
     const HomeDashboard(),
-    const AssignmentsScreen(), // Make sure this exists
-    const SchedulingScreen(), // Make sure this exists
+    const AssignmentsScreen(),
+    const ScheduleScreen(),
   ];
 
   @override
@@ -51,14 +51,5 @@ class _MainNavigationState extends State<MainNavigation> {
         ],
       ),
     );
-  }
-}
-
-class SchedulingScreen extends StatelessWidget {
-  const SchedulingScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container();
   }
 }
