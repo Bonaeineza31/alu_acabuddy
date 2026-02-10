@@ -64,5 +64,5 @@ class AttendanceMetrics {
   });
   
   bool get isBelowThreshold => attendanceRate < 75;
-  bool get isExcellent => attendanceRate >= 95;
+  bool get isExcellent => attendanceRate >= 80;
 }
