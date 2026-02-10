@@ -3,37 +3,23 @@ import 'package:provider/provider.dart';
 import '../../models/assignment.dart';
 import '../../providers/assignment_provider.dart';
 import '../../utils/app_colors.dart';
-import '../../widgets/common/text_field.dart';
-import '../../widgets/common/button.dart';
+import '../../utils/constants.dart';
+import '../common/text_field.dart';
+import '../common/button.dart';
 
-class EditAssignmentDialog extends StatefulWidget {
-  final Assignment assignment;
-
-  const EditAssignmentDialog({
-    super.key,
-    required this.assignment,
-  });
+class AddAssignmentDialog extends StatefulWidget {
+  const AddAssignmentDialog({super.key});
 
   @override
-  State<EditAssignmentDialog> createState() => _EditAssignmentDialogState();
+  State<AddAssignmentDialog> createState() => _AddAssignmentDialogState();
 }
 
-class _EditAssignmentDialogState extends State<EditAssignmentDialog> {
+class _AddAssignmentDialogState extends State<AddAssignmentDialog> {
   final _formKey = GlobalKey<FormState>();
-  late TextEditingController _titleController;
-  late TextEditingController _courseController;
-  late DateTime _selectedDate;
-  late String _selectedPriority;
-
-  @override
-  void initState() {
-    super.initState();
-    _titleController = TextEditingController(text: widget.assignment.title);
-    _courseController =
-        TextEditingController(text: widget.assignment.courseName);
-    _selectedDate = widget.assignment.dueDate;
-    _selectedPriority = widget.assignment.priority;
-  }
+  final _titleController = TextEditingController();
+  final _courseController = TextEditingController();
+  DateTime? _selectedDate;
+  String _selectedPriority = 'Medium';
 
   @override
   void dispose() {
@@ -45,7 +31,7 @@ class _EditAssignmentDialogState extends State<EditAssignmentDialog> {
   Future<void> _selectDate() async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: _selectedDate,
+      initialDate: DateTime.now(),
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 365)),
       builder: (context, child) {
@@ -70,48 +56,62 @@ class _EditAssignmentDialogState extends State<EditAssignmentDialog> {
     }
   }
 
-  void _saveChanges() {
-    if (_formKey.currentState!.validate()) {
+  void _saveAssignment() {
+    if (_formKey.currentState!.validate() && _selectedDate != null) {
       final assignmentProvider =
           Provider.of<AssignmentProvider>(context, listen: false);
 
-      final updatedAssignment = widget.assignment.copyWith(
+      final newAssignment = Assignment(
         title: _titleController.text.trim(),
         courseName: _courseController.text.trim(),
-        dueDate: _selectedDate,
+        dueDate: _selectedDate!,
         priority: _selectedPriority,
       );
 
-      assignmentProvider.updateAssignment(
-          widget.assignment.id, updatedAssignment);
+      assignmentProvider.addAssignment(newAssignment);
       Navigator.pop(context);
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Assignment updated successfully!'),
+          content: Text('Assignment added successfully!'),
           backgroundColor: AppColors.success,
+        ),
+      );
+    } else if (_selectedDate == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select a due date'),
+          backgroundColor: AppColors.danger,
         ),
       );
     }
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
     return Dialog(
       backgroundColor: Colors.transparent,
-      insetPadding: const EdgeInsets.all(20),
+      insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
       child: Container(
-        constraints: const BoxConstraints(maxWidth: 500),
+        constraints: const BoxConstraints(maxWidth: 500, maxHeight: 600),
         decoration: BoxDecoration(
           color: AppColors.cardBackground,
           borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              blurRadius: 20,
+              offset: const Offset(0, 10),
+            ),
+          ],
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             // Header
             Container(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
               decoration: const BoxDecoration(
                 color: AppColors.primary,
                 borderRadius: BorderRadius.only(
@@ -123,7 +123,7 @@ class _EditAssignmentDialogState extends State<EditAssignmentDialog> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text(
-                    'Edit Assignment',
+                    'Add New Assignment',
                     style: TextStyle(
                       color: AppColors.textWhite,
                       fontSize: 18,
@@ -202,9 +202,13 @@ class _EditAssignmentDialogState extends State<EditAssignmentDialog> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                '${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
-                                style: const TextStyle(
-                                  color: AppColors.textPrimary,
+                                _selectedDate == null
+                                    ? 'Select due date'
+                                    : '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}',
+                                style: TextStyle(
+                                  color: _selectedDate == null
+                                      ? AppColors.textSecondary
+                                      : AppColors.textPrimary,
                                   fontSize: 16,
                                 ),
                               ),
@@ -232,20 +236,14 @@ class _EditAssignmentDialogState extends State<EditAssignmentDialog> {
                       const SizedBox(height: 12),
                       Row(
                         children: [
-                          Expanded(
-                            child: _buildPriorityButton(
+                           _buildPriorityButton(
                                 'High', AppColors.highPriority),
-                          ),
                           const SizedBox(width: 12),
-                          Expanded(
-                            child: _buildPriorityButton(
+                          _buildPriorityButton(
                                 'Medium', AppColors.mediumPriority),
-                          ),
                           const SizedBox(width: 12),
-                          Expanded(
-                            child: _buildPriorityButton(
+                           _buildPriorityButton(
                                 'Low', AppColors.lowPriority),
-                          ),
                         ],
                       ),
 
@@ -256,13 +254,15 @@ class _EditAssignmentDialogState extends State<EditAssignmentDialog> {
                         children: [
                           Expanded(
                             child: CustomButton(
-                              text: 'Save Changes',
-                              onPressed: _saveChanges,
-                              icon: Icons.save,
+                              text: 'Add Assignment',
+                              onPressed: _saveAssignment,
+                              icon: Icons.add_circle_outline,
                             ),
                           ),
                           const SizedBox(width: 12),
-                          Expanded(
+                          // Cancel button without Expanded - fixed width
+                          SizedBox(
+                            width: 100,
                             child: CustomButton(
                               text: 'Cancel',
                               onPressed: () => Navigator.pop(context),
@@ -283,28 +283,33 @@ class _EditAssignmentDialogState extends State<EditAssignmentDialog> {
     );
   }
 
-  Widget _buildPriorityButton(String priority, Color color) {
-    final isSelected = _selectedPriority == priority;
+  Widget _buildPriorityButton(String label, Color color) {
+    final isSelected = _selectedPriority == label;
 
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedPriority = priority;
-        });
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(
-          color: isSelected ? color : color,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Center(
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            _selectedPriority = label;
+          });
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            color: isSelected ? color : color.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: color,
+              width: isSelected ? 2 : 1,
+            ),
+          ),
           child: Text(
-            priority,
+            label,
+            textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: isSelected ? AppColors.textWhite : color,
+              color: isSelected ? Colors.white : color, // ← KEY FIX
             ),
           ),
         ),

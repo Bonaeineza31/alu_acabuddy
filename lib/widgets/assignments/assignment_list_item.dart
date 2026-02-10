@@ -1,4 +1,4 @@
-import 'package:alu_acabuddy/screens/assignments/edit_assignment_screen.dart';
+import 'package:alu_acabuddy/widgets/assignments/edit_assignment_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../models/assignment.dart';
