@@ -4,7 +4,7 @@ import '../../providers/session_provider.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/helpers.dart';
 import '../../widgets/sessions/session_list_item.dart';
-import '../../screens/schedule/add_session_dialog.dart';
+import '../../widgets/sessions/add_session_dialog.dart';
 
 class ScheduleScreen extends StatelessWidget {
   const ScheduleScreen({super.key});

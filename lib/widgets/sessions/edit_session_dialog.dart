@@ -4,8 +4,8 @@ import '../../models/session.dart';
 import '../../providers/session_provider.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/constants.dart';
-import '../../widgets/common/text_field.dart';
-import '../../widgets/common/button.dart';
+import '../common/text_field.dart';
+import '../common/button.dart';
 
 class EditSessionDialog extends StatefulWidget {
   final Session session;

@@ -5,7 +5,7 @@ import '../../providers/session_provider.dart';
 import '../../providers/attendance_provider.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/constants.dart';
-import '../../screens/schedule/edit_session_dialog.dart';
+import 'edit_session_dialog.dart';
 
 class SessionListItem extends StatelessWidget {
   final Session session;
